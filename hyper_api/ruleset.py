@@ -10,40 +10,96 @@ import urllib.parse
 
 class KeyIndicatorOption:
     """Creation of a key indicator"""
-    def __init__(self, _target=None, _min_purity=0.1, _max_purity=1, _min_coverage=1, _max_coverage=600):
-        self._target = _target
-        self._min_purity = _min_purity
-        self._max_purity = _max_purity
-        self._min_coverage = _min_coverage
-        self._max_coverage = _max_coverage
+    def __init__(self, target, purity_min=None, purity_max=None, coverage_min=None, coverage_max=None,
+                 lift_min=None, lift_max=None, zscore_min=None, zscore_max=None,
+                 average_value_min=None, average_value_max=None, standard_deviation_min=None, standard_deviation_max=None,
+                 shift_min=None, shift_max=None):
+        self.target = target
+        self.purity_min = purity_min
+        self.purity_max = purity_max
+        self.coverage_min = coverage_min
+        self.coverage_max = coverage_max
+        self.lift_min = lift_min
+        self.lift_max = lift_max
+        self.zscore_min = zscore_min
+        self.zscore_max = zscore_max
+        self.average_value_min = average_value_min
+        self.average_value_max = average_value_max
+        self.standard_deviation_min = standard_deviation_min
+        self.standard_deviation_max = standard_deviation_max
+        self.shift_min = shift_min
+        self.shift_max = shift_max
+
+    def __repr__(self):
+        return "\n{} :".format(self.__class__.__name__) + \
+               "{}".format(self.target) + \
+               ("\t- Purity min: {}\n".format(self.purity_min) if self.purity_min is not None else "") + \
+               ("\t- Purity max: {}\n".format(self.purity_max) if self.purity_max is not None else "") + \
+               ("\t- Coverage min: {}\n".format(self.coverage_min) if self.coverage_min is not None else "") + \
+               ("\t- Coverage max: {}\n".format(self.coverage_max) if self.coverage_max is not None else "") + \
+               ("\t- Lift min: {}\n".format(self.lift_min) if self.lift_min is not None else "") + \
+               ("\t- Lift max: {}\n".format(self.lift_max) if self.lift_max is not None else "") + \
+               ("\t- Z-score min: {}\n".format(self.zscore_min) if self.zscore_min is not None else "") + \
+               ("\t- Z-score max: {}\n".format(self.zscore_max) if self.zscore_max is not None else "") + \
+               ("\t- Average value min: {}\n".format(self.average_value_min) if self.average_value_min is not None else "") + \
+               ("\t- Average value max: {}\n".format(self.average_value_max) if self.average_value_max is not None else "") + \
+               ("\t- Standard deviation min: {}\n".format(self.standard_deviation_min) if self.standard_deviation_min is not None else "") + \
+               ("\t- Standard deviation max: {}\n".format(self.standard_deviation_max) if self.standard_deviation_max is not None else "") + \
+               ("\t- Shift min: {}\n".format(self.shift_min) if self.shift_min is not None else "") + \
+               ("\t- Shift max: {}\n".format(self.shift_max) if self.shift_max is not None else "")
 
 
 class RulesetFactory:
     _PURITY = 'Purity'
     _COVERAGE = 'Coverage'
     _LIFT = 'Lift'
+    _ZSCORE = 'Z-score'
+    _AVERAGE_VALUE = 'Average value'
+    _STANDARD_DEVIATION = 'Standard deviation'
+    _SHIFT = 'Shift'
+    _DISCRETE_MODALITY = "Discrete variable with a modality"
+    _DISCRETE = "Discrete variable"
+    _CONTINUOUS = "Continuous variable"
 
     def __init__(self, api, project_id):
         self.__api = api
         self.__project_id = project_id
 
     @Helper.try_catch
-    def create_kpi_option(self, target, min_purity=0.1, max_purity=1, min_coverage=1, max_coverage=600):
+    def create_kpi_option(self, target, purity_min=None, purity_max=None, coverage_min=None, coverage_max=None,
+                          lift_min=None, lift_max=None, zscore_min=None, zscore_max=None,
+                          average_value_min=None, average_value_max=None, standard_deviation_min=None, standard_deviation_max=None,
+                          shift_min=None, shift_max=None):
         """
-        Create a key indicator
+        Create an additional key indicator
         Args:
             target (Target): Target to generate the key indicator
-            min_purity (int):  Minimum score required for purity score
-            max_purity (int):  Maximum score required for purity score
-            min_coverage (int):  Minimum score required for coverage score
-            max_coverage (int):  Maximum score required for coverage score
+            purity_min (float):  Minimum value for purity score
+            purity_max (float):  Maximum value for purity score
+            coverage_min (float):  Minimum value for coverage score
+            coverage_max (float):  Maximum value for coverage score
+            lift_min (float):  Maximum value for lift score
+            lift_max (float):  Maximum value for lift score
+            zscore_min (float):  Minimum value for zscore score
+            zscore_max (float):  Maximum value for zscore score
+            average_value_min (float):  Minimum value for average value score
+            average_value_max (float):  Maximum value for average value score
+            standard_deviation_min (float):  Minimum value for standard deviation score
+            standard_deviation_max (float):  Maximum value for standard deviation score
+            shift_min (float):  Minimum value for shift score
+            shift_max (float):  Maximum value for shift score
         Returns:
             key indicator
         """
-        return KeyIndicatorOption(target, min_purity, max_purity, min_coverage, max_coverage)
+        return KeyIndicatorOption(target=target, purity_min=purity_min, coverage_min=coverage_min, coverage_max=coverage_max,
+                                  lift_min=lift_min, lift_max=lift_max, zscore_min=zscore_min, zscore_max=zscore_max,
+                                  average_value_min=average_value_min, average_value_max=average_value_max,
+                                  standard_deviation_min=standard_deviation_min, standard_deviation_max=standard_deviation_max,
+                                  shift_min=shift_min, shift_max=shift_max)
 
     @Helper.try_catch
-    def create(self, dataset, name, target, purity_min=None, coverage_min=None, rule_complexity=2, quantiles=10,
+    def create(self, dataset, name, target, purity_min=None, coverage_min=None, lift_min=None, zscore_min=None, average_value_min=None,
+               standard_deviation_max=None, shift_min=None, rule_complexity=2, quantiles=10,
                enable_custom_discretizations=True, min_marginal_contribution=None, compute_other_key_indicators=None,
                locally_increase_complexity=False, max_complexity=3, nb_minimizations=1, coverage_increment=0.01,
                validate_stability=False, split_ratio=0.7, nb_iterations=1, purity_tolerance=0.1):
@@ -54,8 +110,13 @@ class RulesetFactory:
             dataset (Dataset): Dataset used to generate the ruleset
             name (str): Name of the new ruleset
             target (Target): Target to generate the ruleset
-            purity_min (float): Minimum purity of rules, default is the entire dataset purity
-            coverage_min (int): Minimum coverage of the target population for each rule, default is 10
+            purity_min (float): Minimum purity of rules, default is the entire dataset purity (discrete target only)
+            coverage_min (int): Minimum coverage of the target population for each rule, default is 10 (discrete target only)
+            lift_min (float): Minimum lift, default is 1 (discrete target only)
+            zscore_min (float): Minimum Z-score, default is None (discrete target only)
+            average_value_min (float): Minimum average value, default is average value of the target on the whole dataset (continuous target only)
+            standard_deviation_max (float) : Maximum standard deviation, default is None (continuous target only)
+            shift_min (float): Minimum shift, default is None (continuous target only)
             rule_complexity (int): Maximum number of variables in rules, default is 2
             quantiles (int): Number of intervals the continuous variables are quantized in, default is 10
             enable_custom_discretizations (boolean): use custom discretizations, eventually use "quantiles" parameter for remaining variables, default is True
@@ -75,19 +136,23 @@ class RulesetFactory:
             Ruleset
         """
         variable = next(variable for variable in dataset.variables if variable.name == target.variable_name)
-        index = variable.modalities.index(target.modality)
-        datasetPurity = variable.purities[index]
-        score_purity_min = purity_min or round(datasetPurity, 3)
+        score_purity_min = None
+        if (variable.is_discrete):
+            index = variable.modalities.index(target.modality)
+            datasetPurity = variable.purities[index]
+            score_purity_min = purity_min or round(datasetPurity, 3)
 
-        if min_marginal_contribution is None:
-            if score_purity_min > 0.99:
-                min_marginal_contribution = round(1 / score_purity_min - 1, 3)
-            elif score_purity_min > 0.9:
-                min_marginal_contribution = round(0.99 / score_purity_min - 1, 3)
-            else:
-                min_marginal_contribution = 0.1
+            if min_marginal_contribution is None:
+                if score_purity_min > 0.99:
+                    min_marginal_contribution = round(1 / score_purity_min - 1, 3)
+                elif score_purity_min > 0.9:
+                    min_marginal_contribution = round(0.99 / score_purity_min - 1, 3)
+                else:
+                    min_marginal_contribution = 0.1
 
-        coverage_min = coverage_min or 10 if (variable.frequencies[index] < 1000) else 0.01
+            coverage_min = coverage_min or 10 if (variable.frequencies[index] < 1000) else 0.01
+        else:
+            min_marginal_contribution = 0.1
 
         if enable_custom_discretizations is True:
             discretizations = dataset._discretizations
@@ -135,39 +200,86 @@ class RulesetFactory:
                 "kpiName": target.name,
                 "omodality": target.modality
             }
-            if _type == self._PURITY:
+            if _type == self._PURITY and score_purity_min is not None:
                 _kpiData['minValue'] = score_purity_min
-            elif _type == self._COVERAGE:
+            elif _type == self._COVERAGE and coverage_min is not None:
                 _kpiData['minValue'] = coverage_min
-            elif _type == self._LIFT:
-                _kpiData['minValue'] = 1
+            elif _type == self._LIFT and lift_min is not None:
+                _kpiData['minValue'] = lift_min
+            elif _type == self._ZSCORE and zscore_min is not None:
+                _kpiData['minValue'] = zscore_min
+            elif _type == self._AVERAGE_VALUE and average_value_min is not None:
+                _kpiData['minValue'] = average_value_min
+            elif _type == self._STANDARD_DEVIATION and standard_deviation_max is not None:
+                _kpiData['maxValue'] = standard_deviation_max
+            elif _type == self._SHIFT and shift_min is not None:
+                _kpiData['minValue'] = shift_min
             data['task']['params']['target'].append(_kpiData)
 
-        msg = "Rules settings: \n\t- Target: {} \n\t- Min Purity: {} \n\t- Min Coverage: {} \n\t- Rule Complexity: {} \
-\n\t- Default Number of Bins: {} \n\t- Enable custom discretizations: {}  \n\t- Min Marginal contribution: \
-{}".format(target.name, score_purity_min, coverage_min, rule_complexity, quantiles, enable_custom_discretizations, min_marginal_contribution)
+        msg = "Ruleset settings: \n\t- Target: {}".format(target.name) + \
+              ("\n\t- Min Purity: {}".format(score_purity_min) if score_purity_min is not None else "") + \
+              ("\n\t- Min Coverage: {}".format(coverage_min) if coverage_min is not None else "") + \
+              ("\n\t- Min Lift: {}".format(lift_min) if lift_min is not None else "") + \
+              ("\n\t- Min Z-score: {}".format(zscore_min) if zscore_min is not None else "") + \
+              ("\n\t- Min Average value: {}".format(average_value_min) if average_value_min is not None else "") + \
+              ("\n\t- Max Standard deviation: {}".format(standard_deviation_max) if standard_deviation_max is not None else "") + \
+              ("\n\t- Min Shift: {}".format(shift_min) if shift_min is not None else "") + \
+              "\n\t- Rule Complexity: {}\n\t- Default Number of Bins: {} \n\t- Enable custom discretizations: {}  \n\t- Min Marginal contribution: \
+{}".format(rule_complexity, quantiles, enable_custom_discretizations, min_marginal_contribution)
 
         if (len(compute_other_key_indicators) > 0):
             for key_indicator in compute_other_key_indicators:
-                min_param = [key_indicator._min_purity, key_indicator._min_coverage]
-                max_param = [key_indicator._max_purity, key_indicator._max_coverage]
-                other_target = key_indicator._target
-                score_types = ['Purity', 'Coverage']
-                for _id, _type, _mini, _maxi in zip(other_target.score_ids, score_types, min_param, max_param):
+                for _id, _type in zip(key_indicator.target.score_ids, key_indicator.target.scores):
                     _kpiKI = {
                         "kpiId": _id,
                         "type": _type,
-                        "minValue": _mini,
-                        "maxValue": _maxi,
-                        "kpiFamily": other_target.indicator_family,
+                        "kpiFamily": key_indicator.target.indicator_family,
                         "scoreType": _type,
-                        "kpiType": other_target.indicator_type,
-                        "output": other_target.variable_name,
-                        "kpiName": other_target.name,
-                        "omodality": other_target.modality
+                        "kpiType": key_indicator.target.indicator_type,
+                        "output": key_indicator.target.variable_name,
+                        "kpiName": key_indicator.target.name,
+                        "omodality": key_indicator.target.modality
                     }
-                    data['task']['params']['target'].append(_kpiKI)
-                    msg += "\n\t- Key Indicator: {} \n\t- Min {}: {} \n\t- Max {}: {} ".format(other_target.name, _type, _mini, _type, _maxi)
+                    if (key_indicator.target.indicator_type == self._DISCRETE_MODALITY or key_indicator.target.indicator_type == self._DISCRETE):
+                        if _type == self._PURITY:
+                            if key_indicator.purity_min is not None:
+                                _kpiKI['minValue'] = key_indicator.purity_min
+                            if key_indicator.purity_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.purity_max
+                        elif _type == self._COVERAGE:
+                            if key_indicator.coverage_min is not None:
+                                _kpiKI['minValue'] = key_indicator.coverage_min
+                            if key_indicator.coverage_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.coverage_max
+                        elif _type == self._LIFT:
+                            if key_indicator.lift_min is not None:
+                                _kpiKI['minValue'] = key_indicator.lift_min
+                            if key_indicator.lift_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.lift_max
+                        elif _type == self._ZSCORE:
+                            if key_indicator.zscore_min is not None:
+                                _kpiKI['minValue'] = key_indicator.zscore_min
+                            if key_indicator.zscore_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.zscore_max
+                    else:
+                        if _type == self._AVERAGE_VALUE:
+                            if key_indicator.average_value_min is not None:
+                                _kpiKI['minValue'] = key_indicator.average_value_min
+                            if key_indicator.average_value_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.average_value_max
+                        elif _type == self._STANDARD_DEVIATION:
+                            if key_indicator.standard_deviation_min is not None:
+                                _kpiKI['minValue'] = key_indicator.standard_deviation_min
+                            if key_indicator.standard_deviation_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.standard_deviation_max
+                        elif _type == self._SHIFT:
+                            if key_indicator.shift_min is not None:
+                                _kpiKI['minValue'] = key_indicator.shift_min
+                            if key_indicator.shift_max is not None:
+                                _kpiKI['maxValue'] = key_indicator.shift_max
+                    if 'kpis' not in data['task']['params']:
+                        data['task']['params']['kpis'] = []
+                    data['task']['params']['kpis'].append(_kpiKI)
 
         if (locally_increase_complexity):
             data['task']['params']['maxComplexity'] = max_complexity
@@ -258,7 +370,8 @@ class RulesetFactory:
             return rulesets[0]
         return None
 
-    def get_or_create(self, dataset, name, target=None, purity_min=None, coverage_min=None, rule_complexity=2, quantiles=10,
+    def get_or_create(self, dataset, name, target=None, purity_min=None, coverage_min=None, lift_min=None, zscore_min=None, average_value_min=None,
+                      standard_deviation_max=None, shift_min=None, rule_complexity=2, quantiles=10,
                       enable_custom_discretizations=True, min_marginal_contribution=None, compute_other_key_indicators=None,
                       locally_increase_complexity=False, max_complexity=3, nb_minimizations=1, coverage_increment=0.01,
                       validate_stability=False, split_ratio=0.7, nb_iterations=1, purity_tolerance=0.1):
@@ -268,8 +381,13 @@ class RulesetFactory:
         Args:
             name (str): Name of the ruleset
             target (Target): Target to generate the ruleset
-            purity_min (float): Minimum purity of rules, default is the entire dataset purity
-            coverage_min (int): Minimum coverage of the target population for each rule, default is 10
+            purity_min (float): Minimum purity of rules, default is the entire dataset purity (discrete target only)
+            coverage_min (int): Minimum coverage of the target population for each rule, default is 10 (discrete target only)
+            lift_min (float): Minimum lift, default is 1 (discrete target only)
+            zscore_min (float): Minimum Z-score, default is None (discrete target only)
+            average_value_min (float): Minimum average value, default is average value of the target on the whole dataset (continuous target only)
+            standard_deviation_max (float) : Maximum standard deviation, default is None (continuous target only)
+            shift_min (float): Minimum shift, default is None (continuous target only)
             rule_complexity (int): Number of features considered for generating the association rules
             quantiles (int): Number of intervals the continuous variables are quantized in
             enable_custom_discretizations (boolean): use custom discretizations, eventually use "quantiles" parameter for remaining variables, default is True
@@ -293,7 +411,8 @@ class RulesetFactory:
             if (ruleset.name == name) and (ruleset.dataset_id == dataset.dataset_id):
                 return ruleset
 
-        return self.create(dataset, name, target, purity_min, coverage_min, rule_complexity, quantiles, enable_custom_discretizations,
+        return self.create(dataset, name, target, purity_min, coverage_min, lift_min, zscore_min, average_value_min, standard_deviation_max, shift_min,
+                           rule_complexity, quantiles, enable_custom_discretizations,
                            min_marginal_contribution, compute_other_key_indicators, locally_increase_complexity, max_complexity,
                            nb_minimizations, coverage_increment, validate_stability, split_ratio, nb_iterations, purity_tolerance)
 
