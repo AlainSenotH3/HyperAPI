@@ -381,7 +381,7 @@ class Dataset(Base):
             self.description,
             self.size,
             self.created.strftime('%Y-%m-%d %H:%M:%S UTC'),
-            self.modified.strftime('%Y-%m-%d %H:%M:%S UTC'),
+            self.modified.strftime('%Y-%m-%d %H:%M:%S UTC') if self.modified is not None else "",
             self.source_file_name)
 
     # Factory part

@@ -7,4 +7,6 @@ class Base(object):
 
     @staticmethod
     def str2date(string, date_format):
+        if string is None:
+            return None
         return datetime.strptime(string, date_format)
