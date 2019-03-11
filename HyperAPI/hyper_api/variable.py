@@ -145,12 +145,13 @@ class Variable(Base):
         Returns:
             Variable: variable that has been ignored
         """
-        if not self.is_ignored:
-            if self.__api.session.version >= self.__api.session.version.__class__('3.6'):
-                varname = self.name
-                data = {'updateFields': {varname: {'ignored': True }}}
-            else:
-                data = {'changedMetadata': [self.name]}    
+        if self.__api.session.version >= self.__api.session.version.__class__('3.6'):
+            varname = self.name
+            data = {'updateFields': {varname: {'ignored': True }}}
+            returned_json = self.__api.Datasets.metadata(project_ID=self.project_id, dataset_ID=self.dataset_id, json=data)
+            self.__json_returned['ignored'] = list(filter(lambda x: x.get('varName') == self.name, returned_json['metadata']['variables']))[0].get('ignored')
+        elif not self.is_ignored:
+            data = {'changedMetadata': [self.name]}
             self.__api.Datasets.metadata(project_ID=self.project_id, dataset_ID=self.dataset_id, json=data)
             self._update()
         return self
@@ -161,12 +162,13 @@ class Variable(Base):
         Returns:
             Variable: variable that has been kept
         """
-        if self.is_ignored:
-            if self.__api.session.version >= self.__api.session.version.__class__('3.6'):
-                varname = self.name
-                data = {'updateFields': {varname: {'ignored': False }}}
-            else:
-                data = {'changedMetadata': [self.name]}    
+        if self.__api.session.version >= self.__api.session.version.__class__('3.6'):
+            varname = self.name
+            data = {'updateFields': {varname: {'ignored': False }}}
+            returned_json = self.__api.Datasets.metadata(project_ID=self.project_id, dataset_ID=self.dataset_id, json=data)
+            self.__json_returned['ignored'] = list(filter(lambda x: x.get('varName') == self.name, returned_json['metadata']['variables']))[0].get('ignored')
+        elif not self.is_ignored:
+            data = {'changedMetadata': [self.name]}
             self.__api.Datasets.metadata(project_ID=self.project_id, dataset_ID=self.dataset_id, json=data)
             self._update()
         return self
